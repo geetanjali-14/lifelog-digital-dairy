@@ -6,14 +6,18 @@ import { Adapter } from 'next-auth/adapters'
 import bcrypt from 'bcrypt'
 import prisma from '@/lib/prisma'
 
+// Ensure NEXTAUTH_SECRET is set
+const secret = process.env.NEXTAUTH_SECRET || 'development-secret-key-min-32-characters-long'
+
 export const authOptions: NextAuthOptions = {
+  // @ts-ignore - Compatibility between @auth/prisma-adapter and next-auth v4
   adapter: PrismaAdapter(prisma) as Adapter,
   
   providers: [
     // Google OAuth Provider
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       authorization: {
         params: {
           prompt: 'consent',
@@ -32,7 +36,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Invalid credentials')
+          throw new Error('Please enter your email and password')
         }
 
         const user = await prisma.user.findUnique({
@@ -40,7 +44,7 @@ export const authOptions: NextAuthOptions = {
         })
 
         if (!user || !user.passwordHash) {
-          throw new Error('Invalid credentials')
+          throw new Error('No user found with this email')
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -49,7 +53,7 @@ export const authOptions: NextAuthOptions = {
         )
 
         if (!isPasswordValid) {
-          throw new Error('Invalid credentials')
+          throw new Error('Incorrect password')
         }
 
         return {
@@ -63,12 +67,21 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === 'google') {
+        if (!profile?.email) {
+          throw new Error('No email returned from Google')
+        }
+      }
+      return true
+    },
+
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.sub!
-        session.user.email = token.email!
+        session.user.id = token.sub as string
+        session.user.email = token.email as string
         session.user.name = token.name
-        session.user.image = token.picture
+        session.user.image = token.picture as string
       }
       return session
     },
@@ -90,11 +103,11 @@ export const authOptions: NextAuthOptions = {
   },
 
   pages: {
-    signIn: '/auth/signin',
+    signIn: '/signin', // Updated to match the refined page route
     signOut: '/auth/signout',
-    error: '/auth/error',
+    error: '/signin', // Redirect back to signin on error
     verifyRequest: '/auth/verify',
-    newUser: '/dashboard', // Redirect new users to dashboard
+    newUser: '/dashboard',
   },
 
   session: {
@@ -102,7 +115,7 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: secret,
 
   debug: process.env.NODE_ENV === 'development',
 }

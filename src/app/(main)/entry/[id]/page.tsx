@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ChevronLeft, MoreHorizontal, Calendar, Smile, Sparkles, Heart, Wallet, Image as ImageIcon, Edit3, Trash2 } from "lucide-react";
+import { ChevronLeft, MoreHorizontal, Calendar, Smile, Sparkles, Heart, Wallet, Image as ImageIcon, Edit3, Trash2, ChevronRight } from "lucide-react";
 import { FadeIn } from "@/components/motion/FadeIn";
+import Image from "next/image";
 
 export default function DiaryEntryPage() {
   return (
@@ -30,11 +31,13 @@ export default function DiaryEntryPage() {
         <div>
           {/* Hero Image */}
           <FadeIn>
-            <div className="w-full h-56 lg:h-80 rounded-3xl lg:rounded-[24px] overflow-hidden mb-6 shadow-md transition-transform duration-500 hover:scale-[1.01]">
-              <img
+            <div className="w-full h-56 lg:h-80 rounded-3xl lg:rounded-[24px] overflow-hidden mb-6 shadow-md transition-transform duration-500 hover:scale-[1.01] relative">
+              <Image
                 src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
                 alt="Sunset at the ocean"
                 className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </div>
           </FadeIn>
@@ -133,18 +136,22 @@ export default function DiaryEntryPage() {
                 <h2 className="text-lg font-bold text-gray-900">Gallery</h2>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-sm">
-                  <img
+                <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-sm relative">
+                  <Image
                     src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&w=500&q=80"
                     alt="Beach 1"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>
-                <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-sm">
-                  <img
+                <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-sm relative">
+                  <Image
                     src="https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=500&q=80"
                     alt="Beach shells"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>
               </div>
@@ -229,13 +236,5 @@ export default function DiaryEntryPage() {
         </FadeIn>
       </div>
     </div>
-  );
-}
-
-function ChevronRight(props: any) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14M12 5l7 7-7 7" />
-    </svg>
   );
 }

@@ -152,9 +152,18 @@ export default function DashboardPage() {
   );
 }
 
+interface EntryCardProps {
+  id: string;
+  date: string;
+  title: string;
+  emoji: string;
+  preview: string;
+  tags: string[];
+}
+
 // Subcomponents
 
-function EntryCard({ id, date, title, emoji, preview, tags }: any) {
+function EntryCard({ id, date, title, emoji, preview, tags }: EntryCardProps) {
   return (
     <HoverLift>
       <div className="bg-white p-4 lg:p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col relative overflow-hidden h-full lg:hover:border-gray-200 transition-all duration-200">
