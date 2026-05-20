@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Book, BarChart3, User } from "lucide-react";
+import { Home, Book, BarChart3, User, CreditCard } from "lucide-react";
 import clsx from "clsx";
 
 const navItems = [
   { name: "Home", href: "/dashboard", icon: Home },
   { name: "Entries", href: "/timeline", icon: Book },
+  { name: "Money", href: "/transactions", icon: CreditCard },
   { name: "Stats", href: "/stats", icon: BarChart3 },
   { name: "Profile", href: "/profile", icon: User },
 ];

@@ -98,7 +98,7 @@ export default function SignInPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label className="text-sm font-medium text-gray-700">Password</label>
-                <Link href="#" className="text-sm font-medium text-brand hover:underline">
+                <Link href="/forgot-password" title="Go to forgot password page" className="text-sm font-medium text-brand hover:underline">
                   Forgot?
                 </Link>
               </div>

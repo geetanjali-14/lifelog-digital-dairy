@@ -4,7 +4,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Edit3, Mail, Lock, User, Eye, EyeOff, Facebook } from "lucide-react";
+import { Edit3, Mail, Lock, User, Eye, EyeOff, Facebook } from "lucide-react";
 import { FadeIn } from "@/components/motion/FadeIn";
 
 export default function SignUpPage() {
@@ -70,8 +70,9 @@ export default function SignUpPage() {
       } else {
         router.push("/dashboard");
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to create account");
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || "Failed to create account");
     } finally {
       setIsLoading(false);
     }

@@ -1,17 +1,15 @@
 import { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import { Adapter } from 'next-auth/adapters'
-import bcrypt from 'bcrypt'
+import { PrismaAdapter } from '@next-auth/prisma-adapter'
+import bcrypt from 'bcryptjs'
 import prisma from '@/lib/prisma'
 
 // Ensure NEXTAUTH_SECRET is set
 const secret = process.env.NEXTAUTH_SECRET || 'development-secret-key-min-32-characters-long'
 
 export const authOptions: NextAuthOptions = {
-  // @ts-ignore - Compatibility between @auth/prisma-adapter and next-auth v4
-  adapter: PrismaAdapter(prisma) as Adapter,
+  adapter: PrismaAdapter(prisma),
   
   providers: [
     // Google OAuth Provider

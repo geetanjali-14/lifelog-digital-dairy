@@ -1,10 +1,45 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Settings, Calendar, Edit3, Banknote, User, Lock, Bell, ChevronRight, LogOut } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { ChevronLeft, Settings, Edit3, Banknote, User, Lock, Bell, ChevronRight, LogOut, Palette } from "lucide-react";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggeredList, StaggeredItem } from "@/components/motion/StaggeredList";
 import { HoverLift } from "@/components/motion/HoverLift";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import Image from "next/image";
+
+interface Stats {
+  totalEntries: number;
+  totalExpenses: number;
+}
 
 export default function ProfilePage() {
+  const { data: session } = useSession();
+  const [stats, setStats] = useState<Stats | null>(null);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch("/api/dashboard/stats");
+        if (response.ok) {
+          const data = await response.json();
+          setStats({
+            totalEntries: data.totalEntries,
+            totalExpenses: data.totalExpenses
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch stats:", error);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  const userEmail = session?.user?.email || "user@lifelog.app";
+  const userName = session?.user?.name || "LifeLog User";
+
   return (
     <div className="flex flex-col min-h-full pb-6 px-4 pt-6 overflow-y-auto w-full lg:px-8 lg:pt-10 lg:max-w-5xl lg:mx-auto">
       {/* Mobile Top App Bar — hidden on desktop */}
@@ -37,43 +72,44 @@ export default function ProfilePage() {
             <div className="flex flex-col items-center mb-8">
               <div className="relative mb-4">
                 <div className="w-28 h-28 lg:w-36 lg:h-36 rounded-full bg-brand/10 flex items-center justify-center p-1.5 ring-4 ring-white shadow-sm">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-gray-200">
-                    <img
-                      src="https://api.dicebear.com/7.x/notionists/svg?seed=Alex&backgroundColor=FDBA74"
-                      alt="Profile Avatar"
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="w-full h-full rounded-full overflow-hidden bg-gray-200 flex items-center justify-center relative">
+                    {session?.user?.image ? (
+                      <Image
+                        src={session.user.image}
+                        alt="Profile Avatar"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <User className="w-12 h-12 text-gray-400" />
+                    )}
                   </div>
                 </div>
               </div>
 
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">Alex Rivers</h1>
-              <p className="text-brand text-sm font-medium mb-2">alex.rivers@lifelog.app</p>
-              <div className="flex items-center text-gray-500 text-xs">
-                <Calendar className="w-3.5 h-3.5 mr-1" />
-                <span>Member since Jan 2022</span>
-              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">{userName}</h1>
+              <p className="text-brand text-sm font-medium mb-2">{userEmail}</p>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 gap-4 mb-10 lg:mb-0">
               <HoverLift>
-                <div className="bg-white lg:bg-gray-50/80 rounded-[24px] p-6 flex flex-col items-center justify-center shadow-sm border border-gray-100 lg:border-gray-200/50">
+                <div className="bg-white lg:bg-gray-50/80 rounded-[24px] p-6 flex flex-col items-center justify-center shadow-sm border border-gray-100 lg:border-gray-200/50 h-full">
                   <div className="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-4">
                     <Edit3 className="w-6 h-6" strokeWidth={2} />
                   </div>
-                  <span className="text-2xl font-bold text-gray-900 mb-1">482</span>
-                  <span className="text-[10px] font-bold tracking-wider text-gray-500">TOTAL ENTRIES</span>
+                  <span className="text-2xl font-bold text-gray-900 mb-1">{stats?.totalEntries || 0}</span>
+                  <span className="text-[10px] font-bold tracking-wider text-gray-500 text-center uppercase">Total Entries</span>
                 </div>
               </HoverLift>
 
               <HoverLift>
-                <div className="bg-white lg:bg-gray-50/80 rounded-[24px] p-6 flex flex-col items-center justify-center shadow-sm border border-gray-100 lg:border-gray-200/50">
-                  <div className="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-4">
+                <div className="bg-white lg:bg-gray-50/80 rounded-[24px] p-6 flex flex-col items-center justify-center shadow-sm border border-gray-100 lg:border-gray-200/50 h-full">
+                  <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-4">
                     <Banknote className="w-6 h-6" strokeWidth={2} />
                   </div>
-                  <span className="text-2xl font-bold text-gray-900 mb-1">$12,450</span>
-                  <span className="text-[10px] font-bold tracking-wider text-gray-500">LIFETIME SPEND</span>
+                  <span className="text-2xl font-bold text-gray-900 mb-1">${stats?.totalExpenses?.toLocaleString() || 0}</span>
+                  <span className="text-[10px] font-bold tracking-wider text-gray-500 text-center uppercase">Lifetime Spend</span>
                 </div>
               </HoverLift>
             </div>
@@ -82,6 +118,21 @@ export default function ProfilePage() {
 
         {/* Right column: Settings */}
         <FadeIn delay={0.15} className="flex-1 lg:min-w-0">
+          {/* Personalization */}
+          <div className="mb-8">
+            <h2 className="text-lg font-bold text-gray-900 mb-4 px-1 flex items-center gap-2">
+              <Palette className="w-5 h-5 text-brand" />
+              Personalization
+            </h2>
+            <div className="bg-white rounded-2xl p-4 lg:p-6 border border-gray-100 shadow-sm flex items-center justify-between">
+              <div>
+                <span className="font-semibold text-gray-900 block">App Theme</span>
+                <span className="text-xs text-gray-400 mt-0.5">Switch between light, dark, and system themes</span>
+              </div>
+              <ThemeToggle />
+            </div>
+          </div>
+
           {/* Settings List */}
           <div className="mb-4">
             <h2 className="text-lg font-bold text-gray-900 mb-4 px-1">Account Settings</h2>
@@ -116,7 +167,10 @@ export default function ProfilePage() {
 
           {/* Sign Out Button */}
           <div className="mt-8 mb-4 flex justify-center lg:justify-start lg:px-1">
-            <button className="flex items-center space-x-2 text-red-500 font-semibold hover:bg-red-50 px-6 py-3 rounded-full transition-colors active:scale-95">
+            <button 
+              onClick={() => signOut({ callbackUrl: "/signin" })}
+              className="flex items-center space-x-2 text-red-500 font-semibold hover:bg-red-50 px-6 py-3 rounded-full transition-colors active:scale-95"
+            >
               <LogOut className="w-5 h-5" />
               <span>Sign Out</span>
             </button>

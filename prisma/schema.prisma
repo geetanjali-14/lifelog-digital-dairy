@@ -15,21 +15,34 @@ datasource db {
 // ============================================
 
 model User {
-  id            String    @id @default(uuid()) @db.Uuid
-  name          String?   @db.VarChar(255)
-  email         String    @unique @db.VarChar(255)
-  emailVerified DateTime? @map("email_verified") @db.Timestamp()
-  image         String?   @db.Text
-  passwordHash  String?   @map("password_hash") @db.Text // Optional for OAuth users
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamp()
+  id               String    @id @default(uuid()) @db.Uuid
+  name             String?   @db.VarChar(255)
+  email            String    @unique @db.VarChar(255)
+  emailVerified    DateTime? @map("email_verified") @db.Timestamp()
+  image            String?   @db.Text
+  passwordHash     String?   @map("password_hash") @db.Text // Optional for OAuth users
+  resetToken       String?   @map("reset_token") @db.Text
+  resetTokenExpiry DateTime? @map("reset_token_expiry") @db.Timestamp()
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamp()
+
+  // Gamification & Personalization
+  xp            Int     @default(0)
+  level         Int     @default(1)
+  currentStreak Int     @default(0) @map("current_streak")
+  longestStreak Int     @default(0) @map("longest_streak")
+  pinCode       String? @map("pin_code") @db.VarChar(255)
+  theme         String  @default("light") @db.VarChar(50)
 
   // Relations
-  accounts      Account[]
-  sessions      Session[]
-  diaryEntries  DiaryEntry[]
-  tags          Tag[]
-  habits        Habit[]
-  notifications Notification[]
+  accounts         Account[]
+  sessions         Session[]
+  diaryEntries     DiaryEntry[]
+  tags             Tag[]
+  habits           Habit[]
+  notifications    Notification[]
+  userAchievements UserAchievement[]
+  transactions     Transaction[]
+  aiInsights       AiInsight[]
 
   @@map("users")
 }
@@ -84,22 +97,26 @@ model VerificationToken {
 // ============================================
 
 model DiaryEntry {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  title     String?  @db.VarChar(255)
-  entryDate DateTime @default(now()) @map("entry_date") @db.Date
-  content   String   @db.Text
-  mood      String   @db.VarChar(50)
-  highlight String?  @db.Text
-  gratitude String?  @db.Text
-  expense   Decimal? @db.Decimal(10, 2)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp()
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  title          String?  @db.VarChar(255)
+  entryDate      DateTime @default(now()) @map("entry_date") @db.Date
+  content        String   @db.Text
+  mood           String   @db.VarChar(50)
+  highlight      String?  @db.Text
+  gratitude      String?  @db.Text
+  expense        Decimal? @db.Decimal(10, 2) // Legacy field, now using Expense model
+  isPrivate      Boolean  @default(false) @map("is_private")
+  sentimentScore Float?   @map("sentiment_score")
+  aiSummary      String?  @map("ai_summary") @db.Text
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamp()
 
   // Relations
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  attachments Attachment[]
-  entryTags   EntryTag[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attachments  Attachment[]
+  entryTags    EntryTag[]
+  transactions Transaction[]
 
   @@index([userId])
   @@index([entryDate])
@@ -214,4 +231,79 @@ model Notification {
   @@index([userId])
   @@index([userId, isRead])
   @@map("notifications")
+}
+
+// ============================================
+// GAMIFICATION
+// ============================================
+
+model Achievement {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(255)
+  description String   @db.Text
+  icon        String   @db.VarChar(255) // Lucide icon name or URL
+  requirement String   @db.Text // JSON string describing requirement
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp()
+
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  userId        String   @map("user_id") @db.Uuid
+  achievementId String   @map("achievement_id") @db.Uuid
+  unlockedAt    DateTime @default(now()) @map("unlocked_at") @db.Timestamp()
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@id([userId, achievementId])
+  @@map("user_achievements")
+}
+
+// ============================================
+// TRANSACTIONS (INCOME & EXPENSES)
+// ============================================
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model Transaction {
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String          @map("user_id") @db.Uuid
+  entryId         String?         @map("entry_id") @db.Uuid
+  amount          Decimal         @db.Decimal(10, 2)
+  type            TransactionType @default(EXPENSE)
+  category        String          @db.VarChar(100)
+  description     String?         @db.Text
+  transactionDate DateTime        @default(now()) @map("transaction_date") @db.Date
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamp()
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entry DiaryEntry? @relation(fields: [entryId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([transactionDate])
+  @@map("transactions")
+}
+
+// ============================================
+// AI INSIGHTS & CORRELATIONS
+// ============================================
+
+model AiInsight {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  type      String   @db.VarChar(50) // correlation, suggestion, health_score
+  content   String   @db.Text
+  data      Json?    // Raw data for charts if needed
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("ai_insights")
 }
