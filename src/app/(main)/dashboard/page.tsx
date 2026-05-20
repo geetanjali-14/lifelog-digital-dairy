@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Plus, FileText, DollarSign, Smile, Flame, Search, Calendar, User, Target } from "lucide-react";
+import { BookOpen, Plus, DollarSign, Smile, Flame, Search, Calendar, Target } from "lucide-react";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggeredList, StaggeredItem } from "@/components/motion/StaggeredList";
 import { HoverLift } from "@/components/motion/HoverLift";

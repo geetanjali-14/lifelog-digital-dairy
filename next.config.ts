@@ -10,6 +10,8 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: "standalone",
+  outputFileTracingRoot: __dirname,
 };
 
-export default nextConfig;
+export default withPWA(nextConfig as any);

@@ -74,7 +74,6 @@ export function CalendarGraph() {
         {days.map((day) => {
           const dateKey = format(day, "yyyy-MM-dd");
           const dayData = data[dateKey];
-          const hasData = !!dayData;
           
           return (
             <motion.div

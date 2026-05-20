@@ -13,15 +13,20 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("system");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as Theme;
     if (savedTheme) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(savedTheme);
     }
+    setMounted(true);
   }, []);
 
   useEffect(() => {
+    if (!mounted) return;
+
     const root = window.document.documentElement;
     
     if (theme === "system") {
@@ -34,7 +39,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
 
     localStorage.setItem("theme", theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>

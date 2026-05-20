@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BarChart3, TrendingUp, DollarSign, Calendar, Smile, Flame, Target, Award } from "lucide-react";
+import { BarChart3, TrendingUp, DollarSign, Smile, Flame, Target, Award } from "lucide-react";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggeredList, StaggeredItem } from "@/components/motion/StaggeredList";
 import { HoverLift } from "@/components/motion/HoverLift";

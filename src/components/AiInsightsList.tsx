@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Sparkles, X, ChevronRight } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Insight {

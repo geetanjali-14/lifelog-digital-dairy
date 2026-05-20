@@ -65,7 +65,7 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ account, profile }) {
       if (account?.provider === 'google') {
         if (!profile?.email) {
           throw new Error('No email returned from Google')

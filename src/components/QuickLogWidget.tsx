@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Smile, DollarSign, Flame, Check, X, Plus } from "lucide-react";
+import { Smile, DollarSign, Flame, X, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 

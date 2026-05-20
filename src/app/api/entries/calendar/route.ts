@@ -49,7 +49,13 @@ export async function GET(req: NextRequest) {
     });
 
     // Process data into a map for easy lookup
-    const calendarData: Record<string, any> = {};
+    interface CalendarDay {
+      mood: string | null;
+      title: string | null;
+      habitsCompleted: number;
+      totalHabits: number;
+    }
+    const calendarData: Record<string, CalendarDay> = {};
 
     entries.forEach((entry) => {
       const dateKey = format(new Date(entry.entryDate), 'yyyy-MM-dd');

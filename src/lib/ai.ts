@@ -80,7 +80,7 @@ export async function generateReflectionPrompts(recentEntries: string[]) {
 
     const result = JSON.parse(response.choices[0].message.content || "{}");
     return result.prompts || [];
-  } catch (error) {
+  } catch {
     return ["What are you grateful for today?"];
   }
 }

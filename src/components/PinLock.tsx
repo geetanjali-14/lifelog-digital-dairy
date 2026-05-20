@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Lock, Delete, X, AlertCircle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface PinLockProps {
   onSuccess: () => void;
@@ -13,7 +13,6 @@ interface PinLockProps {
 export function PinLock({ onSuccess, onCancel, title = "Enter Vault PIN" }: PinLockProps) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [hasPin, setHasPin] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -25,32 +24,13 @@ export function PinLock({ onSuccess, onCancel, title = "Enter Vault PIN" }: PinL
     checkPin();
   }, []);
 
-  const handleNumberClick = (num: string) => {
-    if (pin.length < 4) {
-      setPin(prev => prev + num);
-      setError(false);
-    }
-  };
-
-  const handleDelete = () => {
-    setPin(prev => prev.slice(0, -1));
-    setError(false);
-  };
-
-  useEffect(() => {
-    if (pin.length === 4) {
-      handleVerify();
-    }
-  }, [pin]);
-
-  const handleVerify = async () => {
-    setLoading(true);
+  const handleVerify = useCallback(async (pinToVerify: string) => {
     try {
       const res = await fetch("/api/auth/vault", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          pin, 
+          pin: pinToVerify, 
           action: hasPin ? "verify" : "set" 
         }),
       });
@@ -66,9 +46,26 @@ export function PinLock({ onSuccess, onCancel, title = "Enter Vault PIN" }: PinL
       }
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
+  }, [hasPin, onSuccess]);
+
+  const handleNumberClick = (num: string) => {
+    setPin(prev => {
+      if (prev.length < 4) {
+        const next = prev + num;
+        if (next.length === 4) {
+          handleVerify(next);
+        }
+        return next;
+      }
+      return prev;
+    });
+    setError(false);
+  };
+
+  const handleDelete = () => {
+    setPin(prev => prev.slice(0, -1));
+    setError(false);
   };
 
   if (hasPin === null) return null;

@@ -17,7 +17,7 @@ export async function GET() {
     });
 
     return NextResponse.json({ hasPin: !!user?.pinCode });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { pin, action, currentPin } = await req.json();
+    const { pin, action } = await req.json();
 
     if (action === 'set') {
       const hashedPin = await bcrypt.hash(pin, 10);

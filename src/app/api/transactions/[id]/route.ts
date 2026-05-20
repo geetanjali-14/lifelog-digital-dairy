@@ -14,9 +14,10 @@ const transactionSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -24,7 +25,7 @@ export async function GET(
 
     const transaction = await prisma.transaction.findUnique({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id
       }
     })
@@ -42,9 +43,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -55,7 +57,7 @@ export async function PUT(
 
     const transaction = await prisma.transaction.update({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id
       },
       data: {
@@ -79,9 +81,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -89,7 +92,7 @@ export async function DELETE(
 
     await prisma.transaction.delete({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id
       }
     })

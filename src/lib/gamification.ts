@@ -1,5 +1,5 @@
 import prisma from "./prisma";
-import { startOfDay, subDays, isSameDay } from "date-fns";
+import { startOfDay } from "date-fns";
 
 export const XP_CONFIG = {
   NEW_ENTRY: 50,

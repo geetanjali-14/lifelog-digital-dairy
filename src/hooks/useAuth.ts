@@ -15,12 +15,12 @@ export function useAuth() {
 
   const logout = async () => {
     await signOut({ redirect: false })
-    router.push('/auth/signin')
+    router.push('/signin')
   }
 
   const requireAuth = () => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/auth/signin')
+      router.push('/signin')
     }
   }
 

@@ -18,7 +18,6 @@ export default function NewEntryPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [prompts, setPrompts] = useState<string[]>([]);
-  const [loadingPrompts, setLoadingPrompts] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -32,15 +31,12 @@ export default function NewEntryPage() {
 
   useEffect(() => {
     async function fetchPrompts() {
-      setLoadingPrompts(true);
       try {
         const res = await fetch("/api/ai/prompts");
         const data = await res.json();
         if (data.prompts) setPrompts(data.prompts);
       } catch (err) {
         console.error(err);
-      } finally {
-        setLoadingPrompts(false);
       }
     }
     fetchPrompts();
